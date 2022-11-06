@@ -9,7 +9,7 @@ type User struct {
 	Role         string               `bson:"role" json:"role"`
 	Name         string               `bson:"name" json:"name"`
 	Email        string               `bson:"email" json:"email"`
-	Password     string               `bson:"password" json:"-password"`
+	Password     string               `bson:"password" json:"password"`
 	PhoneNumber  string               `bson:"phone_number" json:"phone_number"`
 	IsVerified   bool                 `bson:"is_verified" json:"is_verified"`
 	UploadedDocs UploadedDocs         `bson:"uploaded_docs,omitempty" json:"uploaded_docs,omitempty"`
