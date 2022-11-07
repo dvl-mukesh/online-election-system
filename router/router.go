@@ -14,5 +14,7 @@ func Router() *http.ServeMux {
 	router.HandleFunc("/api/search-multiple-user", controller.SearchMultipleUser)
 	router.HandleFunc("/api/delete-user", controller.DeleteUser)
 
+	router.HandleFunc("/api/login", controller.Login)
+
 	return router
 }

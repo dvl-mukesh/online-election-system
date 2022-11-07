@@ -83,6 +83,40 @@ func (e *UserDAO) FindById(id string) ([]*model.User, error) {
 	return Users, nil
 }
 
+func (e *UserDAO) FindByEmailAndPassword(email, password string) ([]*model.User, error) {
+	var Users []*model.User
+
+	cur, err := Collection.Find(ctx, bson.D{primitive.E{Key: "email", Value: email}, primitive.E{Key: "password", Value: password}})
+
+	if err != nil {
+		return Users, errors.New("unable to query db")
+	}
+
+	for cur.Next(ctx) {
+		var e model.User
+
+		err := cur.Decode(&e)
+
+		if err != nil {
+			return Users, err
+		}
+
+		Users = append(Users, &e)
+	}
+
+	if err := cur.Err(); err != nil {
+		return Users, err
+	}
+
+	cur.Close(ctx)
+
+	if len(Users) == 0 {
+		return Users, mongo.ErrNoDocuments
+	}
+
+	return Users, nil
+}
+
 func (e *UserDAO) Delete(id string) error {
 	filter := bson.D{primitive.E{Key: "_id", Value: id}}
 
