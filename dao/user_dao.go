@@ -35,11 +35,11 @@ func (e *UserDAO) Connect() {
 		log.Fatal(err)
 	}
 
-	Collection = client.Database(e.Database).Collection(e.Collection)
+	Election_Collection = client.Database(e.Database).Collection(e.Collection)
 }
 
 func (e *UserDAO) Insert(User model.User) error {
-	_, err := Collection.InsertOne(ctx, User)
+	_, err := Election_Collection.InsertOne(ctx, User)
 
 	if err != nil {
 		fmt.Print(err.Error())
@@ -52,7 +52,7 @@ func (e *UserDAO) Insert(User model.User) error {
 func (e *UserDAO) FindById(id string) ([]*model.User, error) {
 	var Users []*model.User
 
-	cur, err := Collection.Find(ctx, bson.D{primitive.E{Key: "_id", Value: id}})
+	cur, err := Election_Collection.Find(ctx, bson.D{primitive.E{Key: "_id", Value: id}})
 
 	if err != nil {
 		return Users, errors.New("unable to query db")
@@ -86,7 +86,7 @@ func (e *UserDAO) FindById(id string) ([]*model.User, error) {
 func (e *UserDAO) FindByEmailAndPassword(email, password string) ([]*model.User, error) {
 	var Users []*model.User
 
-	cur, err := Collection.Find(ctx, bson.D{primitive.E{Key: "email", Value: email}, primitive.E{Key: "password", Value: password}})
+	cur, err := Election_Collection.Find(ctx, bson.D{primitive.E{Key: "email", Value: email}, primitive.E{Key: "password", Value: password}})
 
 	if err != nil {
 		return Users, errors.New("unable to query db")
@@ -120,7 +120,7 @@ func (e *UserDAO) FindByEmailAndPassword(email, password string) ([]*model.User,
 func (e *UserDAO) Delete(id string) error {
 	filter := bson.D{primitive.E{Key: "_id", Value: id}}
 
-	res, err := Collection.DeleteOne(ctx, filter)
+	res, err := Election_Collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
@@ -138,5 +138,5 @@ func (epd *UserDAO) Update(user model.User) error {
 	update := bson.D{primitive.E{Key: "$set", Value: user}}
 
 	e := &model.User{}
-	return Collection.FindOneAndUpdate(ctx, filter, update).Decode(e)
+	return Election_Collection.FindOneAndUpdate(ctx, filter, update).Decode(e)
 }

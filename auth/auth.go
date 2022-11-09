@@ -12,6 +12,7 @@ type User_Claims struct {
 	Username   string
 	Authorized bool
 	Role       string
+	jwt.StandardClaims
 }
 
 var JWT_SECRET_KEY = []byte(config.APP_CONFIG.JWT_SECRET_KEY)
@@ -37,8 +38,10 @@ func GenerateJWT(user_claims User_Claims) (string, error) {
 func VerifyJWT(endpointHandler func(writer http.ResponseWriter, request *http.Request)) http.HandlerFunc {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if request.Header["Token"] != nil {
-			token, err := jwt.Parse(request.Header["Token"][0], func(token *jwt.Token) (interface{}, error) {
-				_, ok := token.Method.(*jwt.SigningMethodECDSA)
+
+			var claims User_Claims
+			token, err := jwt.ParseWithClaims(request.Header["Token"][0], &claims, func(t *jwt.Token) (interface{}, error) {
+				_, ok := t.Method.(*jwt.SigningMethodHMAC)
 				if !ok {
 					writer.WriteHeader(http.StatusUnauthorized)
 					_, err := writer.Write([]byte("You're Unauthorized"))
@@ -46,9 +49,9 @@ func VerifyJWT(endpointHandler func(writer http.ResponseWriter, request *http.Re
 						return nil, err
 					}
 				}
-				return "", nil
-
+				return JWT_SECRET_KEY, nil
 			})
+
 			// parsing errors result
 			if err != nil {
 				writer.WriteHeader(http.StatusUnauthorized)
@@ -85,7 +88,7 @@ func ExtractClaims(_ http.ResponseWriter, request *http.Request) (User_Claims, e
 		tokenString := request.Header["Token"][0]
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 
-			if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("there's an error with the signing method")
 			}
 			return JWT_SECRET_KEY, nil
